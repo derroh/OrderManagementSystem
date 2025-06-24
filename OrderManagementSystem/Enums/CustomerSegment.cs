@@ -3,6 +3,7 @@
 	public enum CustomerSegment
 	{
 		VIP,
-		Regular
+		Regular,
+		Loyal
 	}
 }
