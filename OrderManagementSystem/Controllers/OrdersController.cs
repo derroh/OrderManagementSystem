@@ -16,7 +16,10 @@ namespace OrderManagementSystem.Controllers
 		private readonly DiscountContext _discountContext = new();
 
 		public OrdersController(IOrderRepository repo) => _repo = repo;
-
+		/// <summary>Updates order status</summary>
+		/// <param name="id">Order ID</param>
+		/// <param name="newStatus">New status</param>
+		/// <returns>Updated order</returns>
 		[HttpPut("{id}/status")]
 		[ProducesResponseType(typeof(Order), 200)]
 		[ProducesResponseType(400)]
@@ -42,6 +45,49 @@ namespace OrderManagementSystem.Controllers
 		public async Task<ActionResult<OrderAnalyticsDto>> GetAnalytics()
 		{
 			return Ok(await _repo.GetAnalyticsAsync());
+		}
+
+		[HttpPost("create")]
+		[ProducesResponseType(typeof(OrderDto), 200)]
+		[ProducesResponseType(400)]
+		[ProducesResponseType(404)]
+		public async Task<IActionResult> CreateOrder([FromBody] OrderDto orderDto)
+		{
+			if (!ModelState.IsValid)
+			{
+				return BadRequest(ModelState); // 400 Bad Request with validation errors
+			}
+
+			try
+			{
+
+				var order = new Order
+				{
+					Id = orderDto.Id,
+					CustomerId = orderDto.CustomerId,
+					CreatedAt = orderDto.CreatedAt,
+					DeliveredAt = orderDto.DeliveredAt,
+					Status = orderDto.Status,
+					TotalAmount = orderDto.TotalAmount
+				};
+				var createdOrder = await _repo.CreateAsync(order);
+
+				if (createdOrder == null)
+					return StatusCode(500, "Failed to create order.");
+
+				return Ok(createdOrder);
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"Internal server error: {ex.Message}");
+			}
+		}
+
+		[HttpGet("orders-list")]
+		[ProducesResponseType(typeof(List<Order>), 200)]
+		public async Task<ActionResult<List<Order>>> GetCustomers()
+		{
+			return Ok(await _repo.ReadAsync());
 		}
 	}
 }

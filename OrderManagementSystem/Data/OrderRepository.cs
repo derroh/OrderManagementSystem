@@ -33,5 +33,19 @@ namespace OrderManagementSystem.Data
 					: TimeSpan.Zero
 			};
 		}
+
+		public async Task<Order> CreateAsync(Order order)
+		{
+			_db.Orders.Add(order);
+			await _db.SaveChangesAsync();
+
+			return order;
+		}
+		public async Task<List<Order>> ReadAsync()
+		{
+			var customers = await _db.Orders.ToListAsync();
+
+			return customers ?? new List<Order>();
+		}
 	}
 }
